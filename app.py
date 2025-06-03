@@ -1,0 +1,170 @@
+import heapq
+from collections import deque, defaultdict
+import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
+import streamlit as st
+
+class Graph:
+    def __init__(self):
+        self.adj_list = defaultdict(dict)
+
+    def add_edge(self, u, v, time):
+        self.adj_list[u][v] = time
+        self.adj_list[v][u] = time
+
+    def dijkstra(self, src, dest):
+        dist = {node: float('inf') for node in self.adj_list}
+        prev = {}
+        dist[src] = 0
+        pq = [(0, src)]
+        while pq:
+            current_dist, u = heapq.heappop(pq)
+            if u == dest:
+                break
+            for v, weight in self.adj_list[u].items():
+                if dist[u] + weight < dist[v]:
+                    dist[v] = dist[u] + weight
+                    prev[v] = u
+                    heapq.heappush(pq, (dist[v], v))
+        return self._reconstruct_path(prev, src, dest)
+
+    def bfs(self, src, dest):
+        visited = set()
+        prev = {}
+        q = deque([src])
+        visited.add(src)
+        while q:
+            u = q.popleft()
+            if u == dest:
+                break
+            for v in self.adj_list[u]:
+                if v not in visited:
+                    visited.add(v)
+                    prev[v] = u
+                    q.append(v)
+        return self._reconstruct_path(prev, src, dest)
+
+    def dfs(self, src, dest):
+        def dfs_helper(u, dest, visited, path):
+            visited.add(u)
+            path.append(u)
+            if u == dest:
+                return True
+            for v in self.adj_list[u]:
+                if v not in visited:
+                    if dfs_helper(v, dest, visited, path):
+                        return True
+            path.pop()
+            return False
+
+        visited = set()
+        path = []
+        if dfs_helper(src, dest, visited, path):
+            return path
+        return []
+
+    def calculate_time(self, path):
+        total_time = 0
+        for i in range(len(path) - 1):
+            total_time += self.adj_list[path[i]][path[i + 1]]
+        return total_time
+
+    def _reconstruct_path(self, prev, src, dest):
+        path = []
+        at = dest
+        while at in prev:
+            path.append(at)
+            at = prev[at]
+        if at == src:
+            path.append(src)
+            path.reverse()
+            return path
+        return []
+
+# Load Excel and create graph
+df = pd.read_excel("HYDF.xlsx")
+metro_graph = Graph()
+nx_graph = nx.Graph()
+
+for _, row in df.iterrows():
+    src, dest, time = row['Source'], row['Destination'], row['Distance']
+    metro_graph.add_edge(src, dest, time)
+    nx_graph.add_edge(src, dest, weight=time)
+
+
+import streamlit as st
+st.markdown("""
+<style>
+    .main { background-color: #0e1117; color: #ffffff; }
+    div.stButton > button {
+        color: white;
+        background-color: #e50914;
+        border-radius: 10px;
+        height: 3em;
+        width: 100%;
+        font-size: 18px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+if 'page' not in st.session_state:
+    st.session_state.page = 'main'
+
+if st.session_state.page == 'main':
+    st.title("Hyderabad Metro Route Finder")
+    st.markdown("Select your route and click **Find Path** to get started!")
+
+    all_stations = sorted(set(df['Source']).union(set(df['Destination'])))
+
+    source = st.selectbox("Select Source Station", all_stations)
+    destination = st.selectbox("Select Destination Station", all_stations)
+    algo = st.selectbox("Choose Algorithm", ['Dijkstra', 'BFS', 'DFS'])
+
+    if st.button("Find Path"):
+        st.session_state.source = source
+        st.session_state.destination = destination
+        st.session_state.algo = algo
+        st.session_state.page = 'result'
+
+elif st.session_state.page == 'result':
+    st.title("🚇 Metro Route Result")
+    st.write(f"**From:** {st.session_state.source}")
+    st.write(f"**To:** {st.session_state.destination}")
+    st.write(f"**Algorithm Used:** {st.session_state.algo}")
+    
+    source = st.session_state.source
+    destination = st.session_state.destination
+    algo = st.session_state.algo
+
+    if algo == 'Dijkstra':
+        path = metro_graph.dijkstra(source, destination)
+    elif algo == 'BFS':
+        path = metro_graph.bfs(source, destination)
+    else:
+        path = metro_graph.dfs(source, destination)
+
+    if path:
+        tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ Visual Map (Optional)"])
+
+        with tab1:
+            st.success(" → ".join(path))
+            st.write("Total time:", metro_graph.calculate_time(path), "minutes")
+            st.write(f"**Total Distance:** {metro_graph.calculate_time(path)} minutes")
+
+        with tab2:
+            st.subheader("Stations on the Route")
+            df_path = pd.DataFrame({
+                "Stop Number": list(range(1, len(path)+1)),
+                "Station": path
+            })
+            st.table(df_path)
+
+        with tab3:
+            st.image('finimg.png')
+            
+    else:
+        st.error("No path found!")
+
+    if st.button("🔙 Back"):
+        st.session_state.page = 'main'
