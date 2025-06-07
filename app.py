@@ -64,11 +64,11 @@ class Graph:
             return path
         return []
 
-    def calculate_time(self, path):
+    def calculate_dist(self, path):
         total_time = 0
         for i in range(len(path) - 1):
-            total_time += self.adj_list[path[i]][path[i + 1]]
-        return total_time
+            total_dist += self.adj_list[path[i]][path[i + 1]]
+        return total_dist
 
     def _reconstruct_path(self, prev, src, dest):
         path = []
@@ -145,12 +145,11 @@ elif st.session_state.page == 'result':
         path = metro_graph.dfs(source, destination)
 
     if path:
-        tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ Visual Map (Optional)"])
+        tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ HYD_METRO_MAP(reference)"])
 
         with tab1:
             st.success(" → ".join(path))
-            st.write("Total time:", metro_graph.calculate_time(path), "minutes")
-            st.write(f"**Total Distance:** {metro_graph.calculate_time(path)} minutes")
+            st.write(f"**Total Distance:** {metro_graph.calculate_dist(path)} minutes")
 
         with tab2:
             st.subheader("Stations on the Route")
