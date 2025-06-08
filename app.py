@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 
 class Graph:
-    def _init_(self):
+    def __init__(self):
         self.adj_list = defaultdict(dict)
 
     def add_edge(self, u, v, time):
@@ -119,7 +119,15 @@ if st.session_state.page == 'main':
 
     source = st.selectbox("Select Source Station", all_stations)
     destination = st.selectbox("Select Destination Station", all_stations)
-    algo = st.selectbox("Choose Algorithm", ['Dijkstra', 'BFS', 'DFS'])
+    algo_label_map = {
+    "Dijkstra": "Dijkstra - Shortest Distance",
+    "BFS": "BFS - Fewest Stops",
+    "DFS": "DFS - Random Depth Path"
+    }
+    algo_display = st.selectbox("Choose Route Strategy", list(algo_label_map.values()))
+    algo = [k for k, v in algo_label_map.items() if v == algo_display][0]
+
+  
 
     if st.button("Find Path"):
         st.session_state.source = source
@@ -180,7 +188,7 @@ elif st.session_state.page == 'result':
                     transfer_html = ""
                     if change_stations:
                         transfer_html += "<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>"
-                        transfer_html += ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)
+                        transfer_html += ''.join(f"<li>You might need to Change train at <b>{station}</b> to switch lines.refer HYD_METRO_MAP.</li>" for station in change_stations)
                         transfer_html += "</ul></div>"
                     
                     ticket_html = f"""
@@ -191,6 +199,8 @@ elif st.session_state.page == 'result':
                     <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
                     {transfer_html}
                     </div>
+                    <p style="text-align:center; margin-top:20px; font-size:16px; color:#22c55e;">😊 Happy Journey!</p>
+
                     """
                     
                     st.markdown(ticket_html, unsafe_allow_html=True)
