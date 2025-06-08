@@ -9,9 +9,9 @@ class Graph:
     def __init__(self):
         self.adj_list = defaultdict(dict)
 
-    def add_edge(self, u, v, time):
-        self.adj_list[u][v] = time
-        self.adj_list[v][u] = time
+    def add_edge(self, u, v, dis):
+        self.adj_list[u][v] = dis
+        self.adj_list[v][u] = dis
 
     def dijkstra(self, src, dest):
         dist = {node: float('inf') for node in self.adj_list}
@@ -195,7 +195,7 @@ elif st.session_state.page == 'result':
                     <h3>🎫 Hyderabad Metro Ticket</h3>
                     <p><strong>From:</strong> {source}</p>
                     <p><strong>To:</strong> {destination}</p>
-                    <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
+                    <p><strong>Total Total Distance:</strong> {total_dist:.1f} KM</p>
                     {transfer_html}
                     </div>
                     <p style="text-align:center; margin-top:20px; font-size:16px; color:#22c55e;">😊 Happy Journey!</p>
