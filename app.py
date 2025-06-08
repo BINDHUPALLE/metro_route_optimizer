@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import streamlit as st
+import heapq
 
 class Graph:
     def __init__(self):
@@ -79,14 +80,14 @@ class Graph:
         while at in prev:
             path.append(at)
             at = prev[at]
-        if color[at] not in no_of_col:
+        if self.color[at] not in no_of_col:
             no_of_col+=[self.color[at]]
         if at == src:
             path.append(src)
             path.reverse()
             return path,no_of_col
         
-        return []
+        return [],[]
 
 # Load Excel and create graph
 df = pd.read_excel("HYDF.xlsx")
@@ -158,11 +159,11 @@ elif st.session_state.page == 'result':
                     change_stations = []
                     #Stations where line changes typically happen
                     if len(no_of_col)>0:
-                        if 'Red Line' and 'Blue Line' in no_of_col:
+                        if 'Red Line' in no_of_col and 'Blue Line' in no_of_col:
                             change_stations+=['Ameerpet']
-                        if 'Green Line' and 'Blue Line' in no_of_col:
+                        if 'Green Line' in no_of_col and 'Blue Line' in no_of_col:
                             change_stations+=['MG Bus Station']
-                        if 'Red Line' and 'Blue Line' in no_of_col:
+                        if 'Green Line' in no_of_col and 'Blue Line' in no_of_col:
                             change_stations+=['Parade Ground']
                             
                     
