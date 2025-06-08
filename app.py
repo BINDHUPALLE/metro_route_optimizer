@@ -177,16 +177,19 @@ elif st.session_state.page == 'result':
                         }
                     </style>
                     """, unsafe_allow_html=True)
+                    transfer_html = ""
+                    if change_stations:
+                        transfer_html += "<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>"
+                        transfer_html += ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)
+                        transfer_html += "</ul></div>"
+                    
                     ticket_html = f"""
                     <div class="ticket">
-                        <h3>🎫 Hyderabad Metro Ticket</h3>
-                        <p><strong>From:</strong> {source}</p>
-                        <p><strong>To:</strong> {destination}</p>
-                        <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
-                    
-                        {"<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>" +
-                         ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations) +
-                         "</ul></div>" if change_stations else ""}
+                    <h3>🎫 Hyderabad Metro Ticket</h3>
+                    <p><strong>From:</strong> {source}</p>
+                    <p><strong>To:</strong> {destination}</p>
+                    <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
+                    {transfer_html}
                     </div>
                     """
                     
