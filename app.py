@@ -93,7 +93,6 @@ for _, row in df.iterrows():
     nx_graph.add_edge(src, dest, weight=time)
 
 
-import streamlit as st
 st.markdown("""
 <style>
     .main { background-color: #0e1117; color: #ffffff; }
