@@ -158,6 +158,14 @@ elif st.session_state.page == 'result':
                     total_dist = metro_graph.calculate_dist(path)
                 
                     # Stations where line changes typically happen
+                    if len(no_of_col)>0:
+                        if 'Red Line' and 'Blue Line' in no_of_col:
+                            change_stations+=['Ameerpet']
+                        if 'Green Line' and 'Blue Line' in no_of_col:
+                            change_stations+=['MG Bus Station']
+                        if 'Red Line' and 'Blue Line' in no_of_col:
+                            change_stations+=['Parade Ground']
+                            
                     change_stations = [no_of_col]
                 
                     st.markdown("""
