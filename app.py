@@ -65,7 +65,7 @@ class Graph:
         return []
 
     def calculate_dist(self, path):
-        total_time = 0
+        total_dist = 0
         for i in range(len(path) - 1):
             total_dist += self.adj_list[path[i]][path[i + 1]]
         return total_dist
