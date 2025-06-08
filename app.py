@@ -184,15 +184,16 @@ elif st.session_state.page == 'result':
                         <p><strong>From:</strong> {source}</p>
                         <p><strong>To:</strong> {destination}</p>
                         <p><strong>Total Estimated Time:</strong> {total_dist} minutes</p>
-                        
+                            
                         <div class="transfer-instruction">
                             <strong>🔁 Transfer Instructions:</strong>
                             <ul>
-                                {''.join(f"<li>Change train at <b>{change_stations}</b> to switch lines.</li>" for station in change_stations)}
+                                {''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)}
                             </ul>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
+                        
 
         with tab2:
             st.subheader("Stations on the Route")
