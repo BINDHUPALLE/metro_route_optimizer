@@ -183,7 +183,7 @@ elif st.session_state.page == 'result':
                         <h3>🎫 Hyderabad Metro Ticket</h3>
                         <p><strong>From:</strong> {source}</p>
                         <p><strong>To:</strong> {destination}</p>
-                        <p><strong>Total Estimated Time:</strong> {total_time} minutes</p>
+                        <p><strong>Total Estimated Time:</strong> {total_dist} minutes</p>
                         
                         <div class="transfer-instruction">
                             <strong>🔁 Transfer Instructions:</strong>
