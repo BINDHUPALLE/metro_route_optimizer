@@ -146,10 +146,53 @@ elif st.session_state.page == 'result':
 
     if path:
         tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ HYD_METRO_MAP(reference)"])
-
         with tab1:
-            st.success(" → ".join(path))
-            st.write(f"**Total Distance:** {metro_graph.calculate_dist(path)} minutes")
+                    st.success(" → ".join(path))
+                    total_dist = metro_graph.calculate_dist(path)
+                
+                    # Stations where line changes typically happen
+                    change_stations = [station for station in ["Ameerpet", "MG Bus Station", "JBS Parade Ground"] if station in path]
+                
+                    st.markdown("""
+                    <style>
+                        .ticket {
+                            background: #1e293b;
+                            padding: 20px;
+                            border-radius: 15px;
+                            color: white;
+                            font-family: 'Courier New', monospace;
+                            border: 2px dashed #38bdf8;
+                        }
+                        .ticket h3 {
+                            color: #facc15;
+                        }
+                        .ticket p {
+                            margin: 5px 0;
+                        }
+                        .transfer-instruction {
+                            background-color: #334155;
+                            padding: 10px;
+                            border-radius: 10px;
+                            margin-top: 15px;
+                        }
+                    </style>
+                    """, unsafe_allow_html=True)
+                
+                    st.markdown(f"""
+                    <div class="ticket">
+                        <h3>🎫 Hyderabad Metro Ticket</h3>
+                        <p><strong>From:</strong> {source}</p>
+                        <p><strong>To:</strong> {destination}</p>
+                        <p><strong>Total Estimated Time:</strong> {total_time} minutes</p>
+                        
+                        <div class="transfer-instruction">
+                            <strong>🔁 Transfer Instructions:</strong>
+                            <ul>
+                                {''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)}
+                            </ul>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
         with tab2:
             st.subheader("Stations on the Route")
