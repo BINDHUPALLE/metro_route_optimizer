@@ -8,13 +8,13 @@ import heapq
 class Graph:
     def __init__(self):
         self.adj_list = defaultdict(dict)
-        self.color={}
+        self.color = {}
 
-    def add_edge(self, u, v, time,clr):
+    def add_edge(self, u, v, time, clr):
         self.adj_list[u][v] = time
         self.adj_list[v][u] = time
-        self.color[u]=clr
-        self.color[v]=clr
+        self.color[u] = clr
+        self.color[v] = clr
 
     def dijkstra(self, src, dest):
         dist = {node: float('inf') for node in self.adj_list}
@@ -64,8 +64,14 @@ class Graph:
         visited = set()
         path = []
         if dfs_helper(src, dest, visited, path):
-            return path
-        return []
+            # Collect color info from DFS path
+            no_of_col = []
+            for node in path:
+                clr = self.color[node]
+                if clr not in no_of_col:
+                    no_of_col.append(clr)
+            return path, no_of_col
+        return [], []
 
     def calculate_dist(self, path):
         total_dist = 0
@@ -75,19 +81,25 @@ class Graph:
 
     def _reconstruct_path(self, prev, src, dest):
         path = []
-        no_of_col=[]
         at = dest
         while at in prev:
             path.append(at)
             at = prev[at]
-        if self.color[at] not in no_of_col:
-            no_of_col+=[self.color[at]]
-        if at == src:
-            path.append(src)
-            path.reverse()
-            return path,no_of_col
-        
-        return [],[]
+        if at != src:
+            return [], []
+
+        path.append(src)
+        path.reverse()
+
+        # Collect all line colors
+        no_of_col = []
+        for node in path:
+            clr = self.color[node]
+            if clr not in no_of_col:
+                no_of_col.append(clr)
+
+        return path, no_of_col
+
 
 # Load Excel and create graph
 df = pd.read_excel("HYDF.xlsx")
@@ -95,12 +107,11 @@ metro_graph = Graph()
 nx_graph = nx.Graph()
 
 for _, row in df.iterrows():
-    src, dest, time,color = row['Source'], row['Destination'], row['Distance'],row['Source Line']
-    metro_graph.add_edge(src, dest, time,color)
+    src, dest, time, color = row['Source'], row['Destination'], row['Distance'], row['Source Line']
+    metro_graph.add_edge(src, dest, time, color)
     nx_graph.add_edge(src, dest, weight=time)
 
-
-import streamlit as st
+# Streamlit UI
 st.markdown("""
 <style>
     .main { background-color: #0e1117; color: #ffffff; }
@@ -136,82 +147,75 @@ if st.session_state.page == 'main':
 
 elif st.session_state.page == 'result':
     st.title("🚇 Metro Route Result")
-    st.write(f"**From:** {st.session_state.source}")
-    st.write(f"**To:** {st.session_state.destination}")
-    st.write(f"**Algorithm Used:** {st.session_state.algo}")
-    
     source = st.session_state.source
     destination = st.session_state.destination
     algo = st.session_state.algo
 
+    st.write(f"**From:** {source}")
+    st.write(f"**To:** {destination}")
+    st.write(f"**Algorithm Used:** {algo}")
+
     if algo == 'Dijkstra':
-        path = metro_graph.dijkstra(source, destination)
+        path, no_of_col = metro_graph.dijkstra(source, destination)
     elif algo == 'BFS':
-        path = metro_graph.bfs(source, destination)
+        path, no_of_col = metro_graph.bfs(source, destination)
     else:
-        path,no_of_col = metro_graph.dfs(source, destination)
+        path, no_of_col = metro_graph.dfs(source, destination)
 
     if path:
         tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ HYD_METRO_MAP(reference)"])
         with tab1:
-                    st.success(" → ".join(path))
-                    total_dist = metro_graph.calculate_dist(path)
-                    change_stations = []
-                    #Stations where line changes typically happen
-                    if len(no_of_col)>0:
-                        if 'Red Line' in no_of_col and 'Blue Line' in no_of_col:
-                            change_stations+=['Ameerpet']
-                        if 'Green Line' in no_of_col and 'Blue Line' in no_of_col:
-                            change_stations+=['MG Bus Station']
-                        if 'Green Line' in no_of_col and 'Blue Line' in no_of_col:
-                            change_stations+=['Parade Ground']
-                            
-                    
-                
-                    st.markdown("""
-                    <style>
-                        .ticket {
-                            background: #1e293b;
-                            padding: 20px;
-                            border-radius: 15px;
-                            color: white;
-                            font-family: 'Courier New', monospace;
-                            border: 2px dashed #38bdf8;
-                        }
-                        .ticket h3 {
-                            color: #facc15;
-                        }
-                        .ticket p {
-                            margin: 5px 0;
-                        }
-                        .transfer-instruction {
-                            background-color: #334155;
-                            padding: 10px;
-                            border-radius: 10px;
-                            margin-top: 15px;
-                        }
-                    </style>
-                    """, unsafe_allow_html=True)
-                    transfer_html = ""
-                    if change_stations:
-                        transfer_html += "<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>"
-                        transfer_html += ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)
-                        transfer_html += "</ul></div>"
-                    
-                    ticket_html = f"""
-                    <div class="ticket">
-                    <h3>🎫 Hyderabad Metro Ticket</h3>
-                    <p><strong>From:</strong> {source}</p>
-                    <p><strong>To:</strong> {destination}</p>
-                    <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
-                    {transfer_html}
-                    </div>
-                    """
-                    
-                    st.markdown(ticket_html, unsafe_allow_html=True)
+            st.success(" → ".join(path))
+            total_dist = metro_graph.calculate_dist(path)
 
-                   
-                        
+            change_stations = set()
+            if 'Red Line' in no_of_col and 'Blue Line' in no_of_col:
+                change_stations.add('Ameerpet')
+                change_stations.add('Parade Ground')
+            if 'Green Line' in no_of_col and 'Blue Line' in no_of_col:
+                change_stations.add('MG Bus Station')
+
+            st.markdown("""
+            <style>
+                .ticket {
+                    background: #1e293b;
+                    padding: 20px;
+                    border-radius: 15px;
+                    color: white;
+                    font-family: 'Courier New', monospace;
+                    border: 2px dashed #38bdf8;
+                }
+                .ticket h3 {
+                    color: #facc15;
+                }
+                .ticket p {
+                    margin: 5px 0;
+                }
+                .transfer-instruction {
+                    background-color: #334155;
+                    padding: 10px;
+                    border-radius: 10px;
+                    margin-top: 15px;
+                }
+            </style>
+            """, unsafe_allow_html=True)
+
+            transfer_html = ""
+            if change_stations:
+                transfer_html += "<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>"
+                transfer_html += ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)
+                transfer_html += "</ul></div>"
+
+            ticket_html = f"""
+            <div class="ticket">
+            <h3>🎫 Hyderabad Metro Ticket</h3>
+            <p><strong>From:</strong> {source}</p>
+            <p><strong>To:</strong> {destination}</p>
+            <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
+            {transfer_html}
+            </div>
+            """
+            st.markdown(ticket_html, unsafe_allow_html=True)
 
         with tab2:
             st.subheader("Stations on the Route")
@@ -223,7 +227,7 @@ elif st.session_state.page == 'result':
 
         with tab3:
             st.image('finimg.png')
-            
+
     else:
         st.error("No path found!")
 
