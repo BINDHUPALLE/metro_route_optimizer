@@ -1,4 +1,3 @@
-import heapq
 from collections import deque, defaultdict
 import pandas as pd
 import networkx as nx
@@ -81,7 +80,7 @@ class Graph:
             path.append(at)
             at = prev[at]
         if color[at] not in no_of_col:
-            no_of_col+=[color[at]]
+            no_of_col+=[self.color[at]]
         if at == src:
             path.append(src)
             path.reverse()
@@ -156,8 +155,8 @@ elif st.session_state.page == 'result':
         with tab1:
                     st.success(" → ".join(path))
                     total_dist = metro_graph.calculate_dist(path)
-                
-                    # Stations where line changes typically happen
+                    change_stations = []
+                    #Stations where line changes typically happen
                     if len(no_of_col)>0:
                         if 'Red Line' and 'Blue Line' in no_of_col:
                             change_stations+=['Ameerpet']
@@ -166,7 +165,7 @@ elif st.session_state.page == 'result':
                         if 'Red Line' and 'Blue Line' in no_of_col:
                             change_stations+=['Parade Ground']
                             
-                    change_stations = [no_of_col]
+                    
                 
                     st.markdown("""
                     <style>
