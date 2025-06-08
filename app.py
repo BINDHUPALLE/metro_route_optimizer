@@ -188,7 +188,7 @@ elif st.session_state.page == 'result':
                         <div class="transfer-instruction">
                             <strong>🔁 Transfer Instructions:</strong>
                             <ul>
-                                {''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)}
+                                {''.join(f"<li>Change train at <b>{change_stations}</b> to switch lines.</li>" for station in change_stations)}
                             </ul>
                         </div>
                     </div>
