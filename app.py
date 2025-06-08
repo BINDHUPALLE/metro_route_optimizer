@@ -8,10 +8,13 @@ import streamlit as st
 class Graph:
     def __init__(self):
         self.adj_list = defaultdict(dict)
+        self.color={}
 
-    def add_edge(self, u, v, time):
+    def add_edge(self, u, v, time,clr):
         self.adj_list[u][v] = time
         self.adj_list[v][u] = time
+        self.color[u]=clr
+        self.color[v]=clr
 
     def dijkstra(self, src, dest):
         dist = {node: float('inf') for node in self.adj_list}
@@ -72,14 +75,18 @@ class Graph:
 
     def _reconstruct_path(self, prev, src, dest):
         path = []
+        no_of_col=[]
         at = dest
         while at in prev:
             path.append(at)
             at = prev[at]
+        if color[at] not in no_of_col:
+            no_of_col+=[color[at]]
         if at == src:
             path.append(src)
             path.reverse()
-            return path
+            return path,no_of_col
+        
         return []
 
 # Load Excel and create graph
@@ -88,8 +95,8 @@ metro_graph = Graph()
 nx_graph = nx.Graph()
 
 for _, row in df.iterrows():
-    src, dest, time = row['Source'], row['Destination'], row['Distance']
-    metro_graph.add_edge(src, dest, time)
+    src, dest, time,color = row['Source'], row['Destination'], row['Distance'],row['Source Line']
+    metro_graph.add_edge(src, dest, time,color)
     nx_graph.add_edge(src, dest, weight=time)
 
 
@@ -142,7 +149,7 @@ elif st.session_state.page == 'result':
     elif algo == 'BFS':
         path = metro_graph.bfs(source, destination)
     else:
-        path = metro_graph.dfs(source, destination)
+        path,no_of_col = metro_graph.dfs(source, destination)
 
     if path:
         tab1, tab2, tab3 = st.tabs(["📍 Route Summary", "📊 Route Table", "🗺️ HYD_METRO_MAP(reference)"])
@@ -151,7 +158,7 @@ elif st.session_state.page == 'result':
                     total_dist = metro_graph.calculate_dist(path)
                 
                     # Stations where line changes typically happen
-                    change_stations = [station for station in ["Ameerpet", "MG Bus Station", "JBS Parade Ground"] if station in path[1:-1]]
+                    change_stations = [no_of_col]
                 
                     st.markdown("""
                     <style>
