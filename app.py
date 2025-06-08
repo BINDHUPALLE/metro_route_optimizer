@@ -151,7 +151,7 @@ elif st.session_state.page == 'result':
                     total_dist = metro_graph.calculate_dist(path)
                 
                     # Stations where line changes typically happen
-                    change_stations = [station for station in ["Ameerpet", "MG Bus Station", "JBS Parade Ground"] if station in path]
+                    change_stations = [station for station in ["Ameerpet", "MG Bus Station", "JBS Parade Ground"] if station in path[1:-1]]
                 
                     st.markdown("""
                     <style>
