@@ -177,22 +177,22 @@ elif st.session_state.page == 'result':
                         }
                     </style>
                     """, unsafe_allow_html=True)
-                
-                    st.markdown(f"""
+                    ticket_html = f"""
                     <div class="ticket">
                         <h3>🎫 Hyderabad Metro Ticket</h3>
                         <p><strong>From:</strong> {source}</p>
                         <p><strong>To:</strong> {destination}</p>
-                        <p><strong>Total Estimated Time:</strong> {total_dist} minutes</p>
-                            
-                        <div class="transfer-instruction">
-                            <strong>🔁 Transfer Instructions:</strong>
-                            <ul>
-                                {''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations)}
-                            </ul>
-                        </div>
+                        <p><strong>Total Estimated Time:</strong> {total_dist:.1f} minutes</p>
+                    
+                        {"<div class='transfer-instruction'><strong>🔁 Transfer Instructions:</strong><ul>" +
+                         ''.join(f"<li>Change train at <b>{station}</b> to switch lines.</li>" for station in change_stations) +
+                         "</ul></div>" if change_stations else ""}
                     </div>
-                    """, unsafe_allow_html=True)
+                    """
+                    
+                    st.markdown(ticket_html, unsafe_allow_html=True)
+
+                   
                         
 
         with tab2:
